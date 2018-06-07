@@ -25,7 +25,7 @@ checkforupdate () {
         if [ ! -d $STAR_PKG_LOC ]
         then
             echo "star-pkg isn't installed, installing from ${STAR_PKG_REPO}"
-            git clone $STAR_PKG_REPO $STAR_PKG_LOC
+            git clone --depth 1 $STAR_PKG_REPO $STAR_PKG_LOC
         fi
         pushd $STAR_PKG_LOC
             git pull --quiet origin master
