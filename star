@@ -56,9 +56,15 @@ then
     else
         echo "Something went wrong trying to uninstall star-pkg"
     fi
-elif [ $# -ge 1 ] && [ -f "$STAR_PKG_LOC/$1" ]
+elif [ $# -ge 1 ]
 then
-    CMD=$1
-    shift
-    $STAR_PKG_LOC/$CMD $@
+    if [ -f "$STAR_PKG_LOC/$1" ]
+    then
+        CMD=$1
+        shift
+        $STAR_PKG_LOC/$CMD $@
+    else
+        echo "I didn't know what to do with '$@'"
+        exit 1
+    fi
 fi
