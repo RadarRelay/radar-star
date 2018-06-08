@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 STAR_PKG_LOC="/usr/local/opt/star-pkg"
+STAR_BIN_LOC="$STAR_PKG_LOC/bin"
 STAR_PKG_REPO="git@github.com:RadarRelay/star-pkg.git"
 
 pushd () {
@@ -25,10 +26,17 @@ checkforupdate () {
         if [ ! -d $STAR_PKG_LOC ]
         then
             echo "star-pkg isn't installed, installing from ${STAR_PKG_REPO}"
-            git clone --depth 1 $STAR_PKG_REPO $STAR_PKG_LOC
+            git clone $STAR_PKG_REPO $STAR_PKG_LOC
         fi
         pushd $STAR_PKG_LOC
-            git pull --quiet origin master
+            if [ ! -z ${STAR_BETA+x} ]
+            then
+                git checkout -q beta
+                git pull --quiet origin beta
+            else
+                git checkout -q master
+                git pull --quiet origin master
+            fi
         popd
     else
         # VAR not set so don't attempt to update
@@ -40,6 +48,28 @@ usage () {
     echo "$0 usage:"
     echo "$0 <command>    execute the given command and arguments"
     echo "$0 uninstall    uninstall the star-pkg repository"
+}
+
+recursiveexec () {
+    if [ "$1" == "" ]
+    then
+        echo "I couldn't find a command called '$INIT_CMD'"
+        exit 2
+    fi
+    if [ -f "$CUR_BIN_LOC/$1" ]
+    then
+        CMD=$1
+        shift
+        $CUR_BIN_LOC/$CMD $@
+    elif [ -d "$CUR_BIN_LOC/$1" ]
+    then
+        CUR_BIN_LOC="$CUR_BIN_LOC/$1"
+        shift
+        recursiveexec $@
+    else
+        echo "I didn't know what to do with '$@'"
+        exit 1
+    fi
 }
 
 checkforupdate
@@ -58,13 +88,7 @@ then
     fi
 elif [ $# -ge 1 ]
 then
-    if [ -f "$STAR_PKG_LOC/$1" ]
-    then
-        CMD=$1
-        shift
-        $STAR_PKG_LOC/$CMD $@
-    else
-        echo "I didn't know what to do with '$@'"
-        exit 1
-    fi
+    INIT_CMD=$1
+    CUR_BIN_LOC=$STAR_BIN_LOC
+    recursiveexec $@
 fi
