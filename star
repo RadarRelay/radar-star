@@ -56,14 +56,17 @@ recursiveexec () {
         echo "I couldn't find a command called '$INIT_CMD'"
         exit 2
     fi
-    if [ -f "$CUR_BIN_LOC/$1" ]
+    if [ -f "$STAR_CUR_BIN_LOC/$1" ]
     then
         CMD=$1
         shift
-        $CUR_BIN_LOC/$CMD $@
-    elif [ -d "$CUR_BIN_LOC/$1" ]
+        # Execute command while setting environment variables
+        STAR_PKG_LOC=$STAR_PKG_LOC \
+            STAR_CUR_BIN_LOC=$STAR_CUR_BIN_LOC \
+            $STAR_CUR_BIN_LOC/$CMD $@
+    elif [ -d "$STAR_CUR_BIN_LOC/$1" ]
     then
-        CUR_BIN_LOC="$CUR_BIN_LOC/$1"
+        STAR_CUR_BIN_LOC="$STAR_CUR_BIN_LOC/$1"
         shift
         recursiveexec $@
     else
@@ -89,6 +92,6 @@ then
 elif [ $# -ge 1 ]
 then
     INIT_CMD=$1
-    CUR_BIN_LOC=$STAR_BIN_LOC
+    STAR_CUR_BIN_LOC=$STAR_BIN_LOC
     recursiveexec $@
 fi
