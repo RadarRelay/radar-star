@@ -3,6 +3,7 @@
 STAR_PKG_LOC="/usr/local/opt/star-pkg"
 STAR_BIN_LOC="$STAR_PKG_LOC/bin"
 STAR_PKG_REPO="git@github.com:RadarRelay/star-pkg.git"
+STAR_DOT_DIR=~/.star
 
 pushd () {
     command pushd "$@" > /dev/null
@@ -14,10 +15,20 @@ popd () {
 
 install () {
     mkdir $STAR_PKG_LOC
+    git clone $STAR_PKG_REPO $STAR_PKG_LOC
+
 }
 
 uninstall() {
     rm -rf $STAR_PKG_LOC
+}
+
+checkdotdir () {
+    if [[ ! -d $STAR_DOT_DIR ]]
+    then
+        mkdir -p $STAR_DOT_DIR
+        chmod 700 $STAR_DOT_DIR
+    fi
 }
 
 checkforupdate () {
@@ -26,7 +37,7 @@ checkforupdate () {
         if [ ! -d $STAR_PKG_LOC ]
         then
             echo "star-pkg isn't installed, installing from ${STAR_PKG_REPO}"
-            git clone $STAR_PKG_REPO $STAR_PKG_LOC
+            install
         fi
         pushd $STAR_PKG_LOC
             if [ ! -z ${STAR_BETA+x} ]
@@ -75,6 +86,7 @@ recursiveexec () {
     fi
 }
 
+checkdotdir
 checkforupdate
 
 if [ $# -eq 0 ]
